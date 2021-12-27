@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 
+import { CreateTuitDto, UpdateTuitDto } from './dto';
 import { Tuit } from './tuit.entity';
 import { TuitsService } from './tuits.service';
 
@@ -23,20 +24,20 @@ export class TuitsController {
     return this.tuitService.getTuits();
   }
   @Get(':id')
-  getTuit(@Param('id') id: string): Tuit {
+  getTuit(@Param('id') id: number): Tuit {
 
     return this.tuitService.getTuit(id);
   }
   @Post()
-  postTuit(@Body('message') message: string): any {
+  postTuit(@Body() message: CreateTuitDto): void {
     return this.tuitService.createTuit(message);
   }
   @Patch(':id')
-  updateTuit(@Param('id') id: string, @Body('message') tuit): Tuit {
+  updateTuit(@Param('id') id: number, @Body() tuit: UpdateTuitDto): Tuit {
     return this.tuitService.updateTuit(id, tuit);
   }
   @Delete(':id')
-  removeTuit(@Param('id') id: string): any {
+  removeTuit(@Param('id') id: number): void {
     return this.tuitService.removeTuit(id);
   }
 }

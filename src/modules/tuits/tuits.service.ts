@@ -1,42 +1,45 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTuitDto, UpdateTuitDto } from './dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
+import { CreateTuitDto, UpdateTuitDto } from './dto';
 import { Tuit } from './tuit.entity';
 
 
 @Injectable()
 export class TuitsService {
-  private tuits: Tuit[] = [
-    {
-      id: 1,
-      message: "Hello world fron Nest.js "
-    }
-  ];
-  getTuits(): Tuit[] {
-    return this.tuits;
+  constructor(@InjectRepository(Tuit) private readonly tuitRepository: Repository<Tuit>) { }
+
+  async getTuits(): Promise<Tuit[]> {
+    return await this.tuitRepository.find();
   }
-  getTuit(id: number): Tuit {
-    const tuit = this.tuits.find((item) => item.id === id);
+  async getTuit(id: number): Promise<Tuit> {
+    const tuit: Tuit = await this.tuitRepository.findOne(id);
     if (!tuit) {
       throw new NotFoundException("Resource not found")
     }
     return tuit
   }
-  createTuit({ message }: CreateTuitDto) {
-    this.tuits.push({
-      id: (Math.floor(Math.random() * 2000) + 1),
-      message,
+  async createTuit({ message }: CreateTuitDto) {
+    const tuit = this.tuitRepository.create({ message })
+    return this.tuitRepository.save(tuit)
+
+  }
+  async updateTuit(id: number, { message }: UpdateTuitDto) {
+    const tuit: Tuit = await this.tuitRepository.preload({
+      id,
+      message
     });
-  }
-  updateTuit(id: number, { message }: UpdateTuitDto) {
-    const tuit: Tuit = this.getTuit(id);
-    tuit.message = message
-    return tuit;
-  }
-  removeTuit(id: number) {
-    const index = this.tuits.findIndex((tuit) => tuit.id === id);
-    if (index >= 0) {
-      this.tuits.splice(index, 1)
+    if (!tuit) {
+      throw new NotFoundException("Resource not found");
     }
+    return tuit
+  }
+  async removeTuit(id: number): Promise<void> {
+    const tuit: Tuit = await this.tuitRepository.findOne(id);
+    if (!tuit) {
+      throw new NotFoundException("Resource not found");
+    }
+    this.tuitRepository.remove(tuit)
   }
 }

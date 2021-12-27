@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { CreateTuitDto, UpdateTuitDto } from './dto';
+import { CreateTuitDto, PaginationQueryDto, UpdateTuitDto } from './dto';
 import { Tuit } from './tuit.entity';
 import { TuitsService } from './tuits.service';
 
@@ -19,9 +19,9 @@ export class TuitsController {
   constructor(private readonly tuitService: TuitsService) { }
 
   @Get()
-  getTuits(@Query() filterQuery): Promise<Tuit[]> {
-    const { searchTerm, OrderBy } = filterQuery;
-    return this.tuitService.getTuits();
+  getTuits(@Query() pagination: PaginationQueryDto): Promise<Tuit[]> {
+
+    return this.tuitService.getTuits(pagination);
   }
   @Get(':id')
   getTuit(@Param('id') id: number): Promise<Tuit> {
